@@ -1,199 +1,214 @@
-'use client';
+'use client'
 
-import { useState, useEffect, useTransition } from 'react';
-import { JobEntry } from '@/db/schema';
-import { FilterType, getEntries, createEntry, updateEntry } from '@/actions/job-tracker';
-import { FilterTabs } from '@/components/filter-tabs';
-import { TrackerTable } from '@/components/tracker-table';
-import { EntryForm } from '@/components/entry-form';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { Button } from '@/components/ui/button';
-import { Plus, Briefcase, Loader2, Target, Send, Video, Trophy } from 'lucide-react';
-import { StatsCard } from '@/components/dashboard-stats';
-import { cn } from '@/lib/utils';
+import { useEffect, useState, useTransition } from 'react'
+import { JobEntry } from '@/db/schema'
+import {
+  FilterType,
+  getEntries,
+  createEntry,
+  updateEntry,
+} from '@/actions/job-tracker'
+import { FilterTabs } from '@/components/filter-tabs'
+import { TrackerTable } from '@/components/tracker-table'
+import { EntryForm } from '@/components/entry-form'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { Button } from '@/components/ui/button'
+import {
+  Briefcase,
+  Plus,
+  Loader2,
+  Target,
+  Send,
+  Video,
+  Bell,
+} from 'lucide-react'
+import { StatsCard } from '@/components/dashboard-stats'
+import { cn } from '@/lib/utils'
 
-export function JobTrackerClient({ initialEntries }: { initialEntries: JobEntry[] }) {
-  const [filter, setFilter] = useState<FilterType>('all');
-  const [entries, setEntries] = useState<JobEntry[]>(initialEntries);
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingEntry, setEditingEntry] = useState<JobEntry | null>(null);
-  const [isPending, startTransition] = useTransition();
+export function JobTrackerClient({
+  initialEntries,
+}: {
+  initialEntries: JobEntry[]
+}) {
+  const [filter, setFilter] = useState<FilterType>('all')
+  const [entries, setEntries] = useState<JobEntry[]>(initialEntries)
+  const [formOpen, setFormOpen] = useState(false)
+  const [editingEntry, setEditingEntry] = useState<JobEntry | null>(null)
+  const [isPending, startTransition] = useTransition()
 
-  // Calculate stats based on ALL entries (not filtered)
+  /* ----------------------------- */
+  /* Stats (always from ALL data)  */
+  /* ----------------------------- */
+
   const stats = {
     total: initialEntries.length,
-    applied: initialEntries.filter(e => e.applicationStatus === 'Applied' || e.applicationStatus === 'UnderReview').length,
-    interviews: initialEntries.filter(e => e.applicationStatus === 'InterviewScheduled').length,
-    offers: initialEntries.filter(e => e.applicationStatus === 'Offer').length,
-    followups: initialEntries.filter(e => {
-      if (e.responseStatus !== 'NoResponse' || !e.nextFollowupDate) return false;
-      const today = new Date();
-      const nextFU = new Date(e.nextFollowupDate);
-      return nextFU <= today;
-    }).length
-  };
+    pipeline: initialEntries.filter(
+      (e) =>
+        e.applicationStatus === 'Applied' ||
+        e.applicationStatus === 'UnderReview',
+    ).length,
+    interviews: initialEntries.filter(
+      (e) => e.applicationStatus === 'InterviewScheduled',
+    ).length,
+    followups: initialEntries.filter((e) => {
+      if (e.responseStatus !== 'NoResponse' || !e.nextFollowupDate) return false
+      return new Date(e.nextFollowupDate) <= new Date()
+    }).length,
+  }
 
-  // Fetch entries when filter changes
+  /* ----------------------------- */
+  /* Data Fetching                 */
+  /* ----------------------------- */
+
   useEffect(() => {
     startTransition(async () => {
-      const data = await getEntries(filter);
-      setEntries(data);
-    });
-  }, [filter]);
+      const data = await getEntries(filter)
+      setEntries(data)
+    })
+  }, [filter])
 
-  const handleFilterChange = (newFilter: FilterType) => {
-    setFilter(newFilter);
-  };
-
-  const handleEdit = (entry: JobEntry) => {
-    setEditingEntry(entry);
-    setFormOpen(true);
-  };
+  /* ----------------------------- */
+  /* Actions                       */
+  /* ----------------------------- */
 
   const handleAdd = () => {
-    setEditingEntry(null);
-    setFormOpen(true);
-  };
+    setEditingEntry(null)
+    setFormOpen(true)
+  }
+
+  const handleEdit = (entry: JobEntry) => {
+    setEditingEntry(entry)
+    setFormOpen(true)
+  }
 
   const handleFormSubmit = async (formData: FormData) => {
-    const id = formData.get('id') as string | null;
-    
-    const data = {
+    const id = formData.get('id') as string | null
+
+    const payload = {
       companyName: formData.get('companyName') as string,
       jobRole: formData.get('jobRole') as string,
-      location: formData.get('location') as string || null,
+      location: (formData.get('location') as string) || null,
       opportunityType: formData.get('opportunityType') as string,
-      contactName: formData.get('contactName') as string || null,
-      designation: formData.get('designation') as string || null,
-      email: formData.get('email') as string || null,
-      linkedinUrl: formData.get('linkedinUrl') as string || null,
-      dateAppliedOrContacted: formData.get('dateAppliedOrContacted') as string,
+      contactName: (formData.get('contactName') as string) || null,
+      designation: (formData.get('designation') as string) || null,
+      email: (formData.get('email') as string) || null,
+      linkedinUrl: (formData.get('linkedinUrl') as string) || null,
+      dateAppliedOrContacted: formData.get(
+        'dateAppliedOrContacted',
+      ) as string,
       applicationStatus: formData.get('applicationStatus') as string,
       responseStatus: formData.get('responseStatus') as string,
-      interviewDate: formData.get('interviewDate') as string || null,
-      resumeVersion: formData.get('resumeVersion') as string || null,
-      emailTemplateVersion: formData.get('emailTemplateVersion') as string || null,
-      jobLink: formData.get('jobLink') as string || null,
-      notes: formData.get('notes') as string || null,
-    };
-
-    if (id) {
-      await updateEntry(id, data as any);
-    } else {
-      await createEntry(data as any);
+      interviewDate: (formData.get('interviewDate') as string) || null,
+      resumeVersion: (formData.get('resumeVersion') as string) || null,
+      emailTemplateVersion:
+        (formData.get('emailTemplateVersion') as string) || null,
+      jobLink: (formData.get('jobLink') as string) || null,
+      notes: (formData.get('notes') as string) || null,
     }
 
-    // Refresh entries
-    const refreshed = await getEntries(filter);
-    setEntries(refreshed);
-  };
+    if (id) {
+      await updateEntry(id, payload as any)
+    } else {
+      await createEntry(payload as any)
+    }
+
+    const refreshed = await getEntries(filter)
+    setEntries(refreshed)
+  }
+
+  /* ----------------------------- */
+  /* UI                            */
+  /* ----------------------------- */
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary/10">
-      {/* Top Navigation */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between">
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur">
+        <div className="mx-auto max-w-7xl h-14 px-4 sm:px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-6 w-6 rounded bg-primary flex items-center justify-center">
-              <Briefcase className="h-3.5 w-3.5 text-primary-foreground" />
+            <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
+              <Briefcase className="h-4 w-4 text-primary-foreground" />
             </div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xs font-bold tracking-tight uppercase px-2 py-0.5 bg-muted rounded">Job Hunter</h1>
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-emerald-500/20 bg-emerald-500/5">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Live</span>
-              </div>
-            </div>
+            <span className="text-sm font-semibold">Job Tracker</span>
           </div>
+
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <div className="h-4 w-px bg-border/40" />
-            <Button 
-              onClick={handleAdd} 
-              size="sm" 
-              className="h-7 gap-1.5 px-3 bg-foreground text-background hover:bg-foreground/90 rounded text-[10px] font-bold uppercase tracking-tight transition-all active:scale-95"
-            >
-              <Plus className="h-3 w-3" />
-              New Entry
+            <Button size="sm" onClick={handleAdd} className="gap-1.5">
+              <Plus className="h-4 w-4" />
+              Add Entry
             </Button>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="flex flex-col gap-10">
-          {/* Hero Section */}
-          <div className="flex flex-col gap-1">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground">Overview</h2>
-            <p className="text-xs font-medium text-muted-foreground/60 uppercase tracking-widest">Job Search Analytics & Pipeline</p>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatsCard 
-              title="Total Outreach" 
-              value={stats.total} 
-              icon={Target} 
-              description="Gross applications"
-              colorClass="bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900"
-            />
-            <StatsCard 
-              title="In Pipeline" 
-              value={stats.applied} 
-              icon={Send} 
-              description="Awaiting feedback"
-              colorClass="bg-indigo-600 text-white"
-            />
-            <StatsCard 
-              title="Interviews" 
-              value={stats.interviews} 
-              icon={Video} 
-              description="Active discussions"
-              colorClass="bg-amber-500 text-white"
-            />
-            <StatsCard 
-              title="Follow-ups" 
-              value={stats.followups} 
-              icon={Loader2} 
-              description="Next steps required"
-              colorClass="bg-rose-600 text-white"
-            />
-          </div>
-
-          <div className="flex flex-col gap-4 mt-4">
-            {/* Filters Bar */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between border-b border-border/20 pb-4 gap-4">
-              <div className="flex items-center gap-4 overflow-x-auto w-full sm:w-auto custom-scrollbar pb-2 sm:pb-0">
-                <FilterTabs
-                  activeFilter={filter}
-                  onFilterChange={handleFilterChange}
-                />
-              </div>
-              <div className="flex items-center justify-end gap-2 shrink-0">
-                <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">
-                  {isPending ? 'Syncing...' : `${entries.length} Opportunities`}
-                </span>
-                <div className={cn(
-                  "h-1.5 w-1.5 rounded-full transition-colors",
-                  isPending ? "bg-amber-400 animate-pulse" : "bg-emerald-400"
-                )} />
-              </div>
-            </div>
-
-            {/* Main Viewport */}
-            <div className={cn(
-              "rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm shadow-sm overflow-hidden transition-all duration-300",
-              isPending && "opacity-60 grayscale-[0.5] scale-[1.002]"
-            )}>
-              <TrackerTable
-                entries={entries}
-                filter={filter}
-                onEdit={handleEdit}
-              />
-            </div>
-          </div>
+      {/* Content */}
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-8 space-y-10">
+        {/* Page Title */}
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Overview
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Track applications, interviews, and follow-ups.
+          </p>
         </div>
+
+        {/* Stats */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatsCard
+            title="Total"
+            value={stats.total}
+            icon={Target}
+            description="All opportunities"
+          />
+          <StatsCard
+            title="In Pipeline"
+            value={stats.pipeline}
+            icon={Send}
+            description="Awaiting response"
+          />
+          <StatsCard
+            title="Interviews"
+            value={stats.interviews}
+            icon={Video}
+            description="Scheduled"
+          />
+          <StatsCard
+            title="Follow-ups"
+            value={stats.followups}
+            icon={Bell}
+            description="Action needed"
+          />
+        </div>
+
+        {/* Filters + Table */}
+        <section className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <FilterTabs
+              activeFilter={filter}
+              onFilterChange={setFilter}
+            />
+
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              {isPending ? 'Updating…' : `${entries.length} results`}
+            </div>
+          </div>
+
+          <div
+            className={cn(
+              'rounded-lg border bg-card overflow-hidden transition-opacity',
+              isPending && 'opacity-60',
+            )}
+          >
+            <TrackerTable
+              entries={entries}
+              filter={filter}
+              onEdit={handleEdit}
+            />
+          </div>
+        </section>
       </main>
 
       {/* Entry Form */}
@@ -204,5 +219,5 @@ export function JobTrackerClient({ initialEntries }: { initialEntries: JobEntry[
         onSubmit={handleFormSubmit}
       />
     </div>
-  );
+  )
 }
