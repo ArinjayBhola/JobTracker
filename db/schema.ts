@@ -1,4 +1,6 @@
 import { pgTable, uuid, text, date, integer, timestamp, pgEnum, primaryKey } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+
 import type { AdapterAccountType } from "next-auth/adapters"
 
 // Enums
@@ -163,6 +165,35 @@ export const jobTracker = pgTable('job_tracker', {
   // Archiving
   isArchived: text('is_archived', { enum: ['true', 'false'] }).notNull().default('false'),
 });
+
+// Relations
+export const usersRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts),
+  sessions: many(sessions),
+  jobTracker: many(jobTracker),
+}));
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, {
+    fields: [accounts.userId],
+    references: [users.id],
+  }),
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+  }),
+}));
+
+export const jobTrackerRelations = relations(jobTracker, ({ one }) => ({
+  user: one(users, {
+    fields: [jobTracker.userId],
+    references: [users.id],
+  }),
+}));
+
 
 // Type inference
 export type JobEntry = typeof jobTracker.$inferSelect;

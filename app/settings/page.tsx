@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useTheme } from "next-themes"
 import { setUserPassword, getExportData, getUserSecurityStatus } from "@/actions/user"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,16 +9,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import * as XLSX from "xlsx"
 import { toast } from "sonner"
-import { Loader2, Download, Lock, ShieldCheck, FileSpreadsheet, KeyRound } from "lucide-react"
+import { Loader2, Download, Lock, ShieldCheck, FileSpreadsheet, KeyRound, Palette, Sun, Moon, Monitor } from "lucide-react"
 import { Header } from "@/components/header"
 import { Separator } from "@/components/ui/separator"
 
 export default function SettingsPage() {
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [securityStatus, setSecurityStatus] = useState<{ isGoogleUser: boolean, hasPassword: boolean } | null>(null)
+
+  // Avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const fetchSecurityStatus = async () => {
@@ -155,7 +163,60 @@ export default function SettingsPage() {
                 </Card>
               )}
 
+              {/* Appearance Card */}
+              <Card className="border shadow-sm rounded-2xl overflow-hidden ring-1 ring-black/5">
+                <CardHeader className="bg-white dark:bg-muted/50 pb-8">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-purple-500/10 rounded-lg">
+                      <Palette className="w-5 h-5 text-purple-500" />
+                    </div>
+                    <CardTitle className="text-xl">Appearance</CardTitle>
+                  </div>
+                  <CardDescription className="text-base">
+                    Customize how Job Tracker looks on your device.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-8">
+                  <div className="grid grid-cols-3 gap-4">
+                    <button
+                      onClick={() => setTheme("light")}
+                      className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all ${
+                        mounted && theme === "light"
+                          ? "border-primary bg-primary/5"
+                          : "border-muted hover:border-primary/50"
+                      }`}
+                    >
+                      <Sun className="h-6 w-6" />
+                      <span className="text-sm font-medium">Light</span>
+                    </button>
+                    <button
+                      onClick={() => setTheme("dark")}
+                      className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all ${
+                        mounted && theme === "dark"
+                          ? "border-primary bg-primary/5"
+                          : "border-muted hover:border-primary/50"
+                      }`}
+                    >
+                      <Moon className="h-6 w-6" />
+                      <span className="text-sm font-medium">Dark</span>
+                    </button>
+                    <button
+                      onClick={() => setTheme("system")}
+                      className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all ${
+                        mounted && theme === "system"
+                          ? "border-primary bg-primary/5"
+                          : "border-muted hover:border-primary/50"
+                      }`}
+                    >
+                      <Monitor className="h-6 w-6" />
+                      <span className="text-sm font-medium">System</span>
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Data Management Card */}
+
               <Card className="border shadow-sm rounded-2xl overflow-hidden ring-1 ring-black/5">
                 <CardHeader className="bg-white dark:bg-muted/50 pb-8">
                   <div className="flex items-center gap-3 mb-2">
