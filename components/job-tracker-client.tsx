@@ -10,6 +10,7 @@ import {
 } from '@/actions/job-tracker'
 import { FilterTabs } from '@/components/filter-tabs'
 import { TrackerTable } from '@/components/tracker-table'
+import { KanbanBoard } from '@/components/kanban-board'
 import { EntryForm } from '@/components/entry-form'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
@@ -21,6 +22,9 @@ import {
   Send,
   Video,
   Bell,
+  LayoutGrid,
+  List as ListIcon,
+  RefreshCcw,
 } from 'lucide-react'
 import { StatsCard } from '@/components/dashboard-stats'
 import { cn } from '@/lib/utils'
@@ -33,6 +37,7 @@ export function JobTrackerClient({
 }) {
   const [filter, setFilter] = useState<FilterType>('all')
   const [entries, setEntries] = useState<JobEntry[]>(initialEntries)
+  const [view, setView] = useState<'table' | 'kanban'>('table')
   const [formOpen, setFormOpen] = useState(false)
   const [editingEntry, setEditingEntry] = useState<JobEntry | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -144,6 +149,25 @@ export function JobTrackerClient({
     setEntries(refreshed)
   }
 
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    startTransition(async () => {
+        try {
+            await updateEntry(id, { applicationStatus: newStatus } as any)
+            const refreshed = await getEntries(filter)
+            setEntries(refreshed)
+        } catch (error) {
+            console.error("Failed to update status:", error)
+        }
+    })
+  }
+
+  const handleRefresh = async () => {
+    startTransition(async () => {
+      const refreshed = await getEntries(filter)
+      setEntries(refreshed)
+    })
+  }
+
   /* ----------------------------- */
   /* UI                            */
   /* ----------------------------- */
@@ -198,13 +222,44 @@ export function JobTrackerClient({
 
         {/* Filters + Table */}
         <section className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <FilterTabs
-              activeFilter={filter}
-              onFilterChange={setFilter}
-            />
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="w-full overflow-x-auto pb-1 sm:pb-0 custom-scrollbar">
+                    <FilterTabs
+                        activeFilter={filter}
+                        onFilterChange={setFilter}
+                    />
+                </div>
+                <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-md border w-fit">
+                    <Button 
+                        variant={view === 'table' ? 'secondary' : 'ghost'} 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={() => setView('table')}
+                    >
+                        <ListIcon className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                        variant={view === 'kanban' ? 'secondary' : 'ghost'} 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={() => setView('kanban')}
+                    >
+                        <LayoutGrid className="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
 
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground whitespace-nowrap">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                onClick={handleRefresh}
+                disabled={isPending}
+              >
+                <RefreshCcw className={cn("h-3.5 w-3.5", isPending && "animate-spin")} />
+              </Button>
               {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               {isPending ? 'Updating…' : `${entries.length} results`}
             </div>
@@ -216,15 +271,32 @@ export function JobTrackerClient({
               isPending && 'opacity-60',
             )}
           >
-            <TrackerTable
-              entries={entries}
-              filter={filter}
-              onEdit={handleEdit}
-              onDelete={async () => {
-                const refreshed = await getEntries(filter)
-                setEntries(refreshed)
-              }}
-            />
+            {view === 'table' ? (
+                <TrackerTable
+                    entries={entries}
+                    filter={filter}
+                    onEdit={handleEdit}
+                    onDelete={async () => {
+                        const refreshed = await getEntries(filter)
+                        setEntries(refreshed)
+                    }}
+                />
+            ) : (
+                <div className="p-4 overflow-hidden">
+                    <KanbanBoard 
+                        entries={entries}
+                        onStatusChange={handleStatusChange}
+                        onEdit={handleEdit}
+                        onDelete={async (id) => {
+                            // Using the existing delete logic pattern from TrackerTable context if needed
+                            // But usually onDelete here just needs to refresh or handle the call
+                            // Let's keep it consistent with the parent's delete handling
+                            const refreshed = await getEntries(filter)
+                            setEntries(refreshed)
+                        }}
+                    />
+                </div>
+            )}
           </div>
         </section>
       </main>

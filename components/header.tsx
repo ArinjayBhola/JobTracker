@@ -25,11 +25,11 @@ export function Header({ children }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur">
       <div className="mx-auto max-w-7xl h-14 px-4 sm:px-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
+        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center shrink-0">
             <Briefcase className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="text-sm font-semibold">Job Tracker</span>
+          <span className="text-sm font-semibold hidden sm:block">Job Tracker</span>
         </Link>
         
         <div className="flex items-center gap-3">

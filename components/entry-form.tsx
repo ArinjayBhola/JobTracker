@@ -38,10 +38,6 @@ interface EntryFormProps {
   onSubmit: (data: FormData) => Promise<void>
 }
 
-/* ----------------------------- */
-/* Small UI helpers              */
-/* ----------------------------- */
-
 function Section({
   title,
   description,
@@ -91,10 +87,6 @@ function Field({
   )
 }
 
-/* ----------------------------- */
-/* EntryForm                     */
-/* ----------------------------- */
-
 export function EntryForm({
   open,
   onOpenChange,
@@ -119,22 +111,21 @@ export function EntryForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[720px] p-0 overflow-hidden border-none shadow-2xl">
-        <DialogHeader className="bg-muted/30 px-6 py-6 border-b">
+      <DialogContent className="sm:max-w-[720px] p-0 overflow-hidden border-none shadow-2xl h-full sm:h-auto max-h-screen sm:max-h-[90vh] flex flex-col">
+        <DialogHeader className="bg-muted/30 px-4 sm:px-6 py-4 sm:py-6 border-b shrink-0">
           <DialogTitle className="text-xl font-bold tracking-tight">
             {entry ? 'Edit Opportunity' : 'New Opportunity'}
           </DialogTitle>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             Track job applications, networking outreach, and interview stages.
           </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-col">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
           {entry && <input type="hidden" name="id" value={entry.id} />}
 
-          <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
+          <div className="px-4 sm:px-6 py-6 overflow-y-auto flex-1">
             <div className="space-y-8">
-              {/* Company & Role Section */}
               <Section title="Opportunity Details">
                 <div className="grid gap-5 md:grid-cols-2">
                   <Field label="Company Name" required>
@@ -184,7 +175,7 @@ export function EntryForm({
                     <Input
                       name="contactName"
                       defaultValue={entry?.contactName ?? ''}
-                      placeholder="e.g. Arinjay Bhola"
+                      placeholder="Name..."
                       className="bg-background"
                     />
                   </Field>
@@ -214,7 +205,7 @@ export function EntryForm({
                       name="email"
                       type="email"
                       defaultValue={entry?.email ?? ''}
-                      placeholder="e.g. arinjay@example.com"
+                      placeholder="email@example.com"
                       className="bg-background"
                     />
                   </Field>
@@ -229,13 +220,8 @@ export function EntryForm({
                     />
                   </Field>
                 </div>
-
-                <div className="grid gap-5 md:grid-cols-2 mt-4">
-                  {/* Duplicate jobLink field removed here */}
-                </div>
               </Section>
 
-              {/* Outreach & Classification */}
               <Section title="Classification">
                 <div className="grid gap-5 md:grid-cols-2">
                   <Field label="Opportunity Type" required>
@@ -258,7 +244,6 @@ export function EntryForm({
                 </div>
               </Section>
 
-              {/* Tracking & Timeline */}
               <Section title="Status & Timeline">
                 <div className="grid gap-5 md:grid-cols-2">
                   <Field label="Application / Contact Date" required>
@@ -344,7 +329,6 @@ export function EntryForm({
                 )}
               </Section>
 
-              {/* Notes */}
               <Section title="Additional Notes">
                 <Textarea
                   name="notes"
@@ -357,33 +341,33 @@ export function EntryForm({
             </div>
           </div>
 
-          <footer className="border-t bg-muted/20 px-6 py-5 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <footer className="border-t bg-muted/20 px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between shrink-0">
+            <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  <span>Saving opportunity...</span>
+                  <span>Saving...</span>
                 </>
               ) : (
                 <span className="flex items-center gap-1.5 text-xs bg-emerald-500/10 text-emerald-600 px-2 py-1 rounded-full font-medium">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Form Ready
+                  Ready
                 </span>
               )}
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 w-full sm:w-auto">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={loading}
-                className="hover:bg-background"
+                className="flex-1 sm:flex-none hover:bg-background"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading} className="min-w-[120px] font-semibold shadow-sm">
-                {entry ? 'Update Entry' : 'Create Opportunity'}
+              <Button type="submit" disabled={loading} className="flex-[2] sm:flex-none sm:min-w-[120px] font-semibold shadow-sm">
+                {entry ? 'Update' : 'Create'}
               </Button>
             </div>
           </footer>
