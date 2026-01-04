@@ -104,9 +104,7 @@ export function EntryForm({
   const [loading, setLoading] = useState(false)
   const today = new Date().toISOString().split('T')[0]
 
-  async function handleSubmit(
-    e: React.FormEvent<HTMLFormElement>,
-  ) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
 
@@ -121,196 +119,271 @@ export function EntryForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[680px] p-0">
-        <DialogHeader className="border-b px-6 py-4">
-          <DialogTitle className="text-base">
+      <DialogContent className="sm:max-w-[720px] p-0 overflow-hidden border-none shadow-2xl">
+        <DialogHeader className="bg-muted/30 px-6 py-6 border-b">
+          <DialogTitle className="text-xl font-bold tracking-tight">
             {entry ? 'Edit Opportunity' : 'New Opportunity'}
           </DialogTitle>
-          <p className="text-xs text-muted-foreground">
-            Track job applications and outreach.
+          <p className="text-sm text-muted-foreground mt-1">
+            Track job applications, networking outreach, and interview stages.
           </p>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col">
-          {entry && (
-            <input type="hidden" name="id" value={entry.id} />
-          )}
+          {entry && <input type="hidden" name="id" value={entry.id} />}
 
-          <div className="px-6 py-6 max-h-[70vh] overflow-y-auto space-y-8">
-            {/* Company */}
-            <Section title="Company">
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Company" required>
-                  <Input
-                    name="companyName"
-                    defaultValue={entry?.companyName ?? ''}
-                    required
-                  />
-                </Field>
+          <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
+            <div className="space-y-8">
+              {/* Company & Role Section */}
+              <Section title="Opportunity Details">
+                <div className="grid gap-5 md:grid-cols-2">
+                  <Field label="Company Name" required>
+                    <Input
+                      name="companyName"
+                      defaultValue={entry?.companyName ?? ''}
+                      placeholder="e.g. Google, Stripe, or Early-stage Startup"
+                      required
+                      className="bg-background"
+                    />
+                  </Field>
 
-                <Field label="Role" required>
-                  <Input
-                    name="jobRole"
-                    defaultValue={entry?.jobRole ?? ''}
-                    required
-                  />
-                </Field>
-              </div>
+                  <Field label="Job Role / Title" required>
+                    <Input
+                      name="jobRole"
+                      defaultValue={entry?.jobRole ?? ''}
+                      placeholder="e.g. Senior Frontend Engineer"
+                      required
+                      className="bg-background"
+                    />
+                  </Field>
+                </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Location">
-                  <Input
-                    name="location"
-                    defaultValue={entry?.location ?? ''}
-                  />
-                </Field>
+                <div className="grid gap-5 md:grid-cols-2 mt-4">
+                  <Field label="Work Location">
+                    <Input
+                      name="location"
+                      defaultValue={entry?.location ?? ''}
+                      placeholder="e.g. Remote, Bangalore, or Hybrid"
+                      className="bg-background"
+                    />
+                  </Field>
 
-                <Field label="Job URL">
-                  <Input
-                    name="jobLink"
-                    type="url"
-                    defaultValue={entry?.jobLink ?? ''}
-                  />
-                </Field>
-              </div>
-            </Section>
+                  <Field label="Job Posting URL">
+                    <Input
+                      name="jobLink"
+                      type="url"
+                      defaultValue={entry?.jobLink ?? ''}
+                      placeholder="e.g. https://linkedin.com/jobs/..."
+                      className="bg-background"
+                    />
+                  </Field>
+                </div>
 
-            {/* Outreach */}
-            <Section title="Outreach">
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Opportunity Type" required>
-                  <Select
-                    name="opportunityType"
-                    defaultValue={
-                      entry?.opportunityType ?? 'JobApplication'
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {OPPORTUNITY_TYPES.map((t) => (
-                        <SelectItem key={t} value={t}>
-                          {OPPORTUNITY_TYPE_LABELS[t]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
+                <div className="grid gap-5 md:grid-cols-2 mt-4">
+                  <Field label="Contact Person Name">
+                    <Input
+                      name="contactName"
+                      defaultValue={entry?.contactName ?? ''}
+                      placeholder="e.g. Arinjay Bhola"
+                      className="bg-background"
+                    />
+                  </Field>
 
-                <Field label="Designation">
-                  <Select
-                    name="designation"
-                    defaultValue={entry?.designation ?? ''}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DESIGNATIONS.map((d) => (
-                        <SelectItem key={d} value={d}>
-                          {DESIGNATION_LABELS[d]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
-              </div>
-            </Section>
+                  <Field label="Contact Designation">
+                    <Select
+                      name="designation"
+                      defaultValue={entry?.designation ?? ''}
+                    >
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="e.g. Recruiter, Founder" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DESIGNATIONS.map((d) => (
+                          <SelectItem key={d} value={d}>
+                            {DESIGNATION_LABELS[d]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                </div>
 
-            {/* Tracking */}
-            <Section title="Tracking">
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Date Applied" required>
-                  <Input
-                    type="date"
-                    name="dateAppliedOrContacted"
-                    defaultValue={
-                      entry?.dateAppliedOrContacted ?? today
-                    }
-                    required
-                  />
-                </Field>
+                <div className="grid gap-5 md:grid-cols-2 mt-4">
+                  <Field label="Contact Email">
+                    <Input
+                      name="email"
+                      type="email"
+                      defaultValue={entry?.email ?? ''}
+                      placeholder="e.g. arinjay@example.com"
+                      className="bg-background"
+                    />
+                  </Field>
 
-                <Field label="Interview Date">
-                  <Input
-                    type="date"
-                    name="interviewDate"
-                    defaultValue={entry?.interviewDate ?? ''}
-                  />
-                </Field>
-              </div>
+                  <Field label="Contact LinkedIn Profile">
+                    <Input
+                      name="linkedinUrl"
+                      type="url"
+                      defaultValue={entry?.linkedinUrl ?? ''}
+                      placeholder="e.g. https://linkedin.com/in/..."
+                      className="bg-background"
+                    />
+                  </Field>
+                </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Application Status">
-                  <Select
-                    name="applicationStatus"
-                    defaultValue={
-                      entry?.applicationStatus ?? 'Draft'
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {APPLICATION_STATUSES.map((s) => (
-                        <SelectItem key={s} value={s}>
-                          {APPLICATION_STATUS_LABELS[s]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
+                <div className="grid gap-5 md:grid-cols-2 mt-4">
+                  {/* Duplicate jobLink field removed here */}
+                </div>
+              </Section>
 
-                <Field label="Response Status">
-                  <Select
-                    name="responseStatus"
-                    defaultValue={
-                      entry?.responseStatus ?? 'NoResponse'
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {RESPONSE_STATUSES.map((s) => (
-                        <SelectItem key={s} value={s}>
-                          {RESPONSE_STATUS_LABELS[s]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
-              </div>
-            </Section>
+              {/* Outreach & Classification */}
+              <Section title="Classification">
+                <div className="grid gap-5 md:grid-cols-2">
+                  <Field label="Opportunity Type" required>
+                    <Select
+                      name="opportunityType"
+                      defaultValue={entry?.opportunityType ?? 'JobApplication'}
+                    >
+                      <SelectTrigger className="bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {OPPORTUNITY_TYPES.map((t) => (
+                          <SelectItem key={t} value={t}>
+                            {OPPORTUNITY_TYPE_LABELS[t]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                </div>
+              </Section>
 
-            <Section title="Notes">
-              <Textarea
-                name="notes"
-                rows={3}
-                defaultValue={entry?.notes ?? ''}
-              />
-            </Section>
+              {/* Tracking & Timeline */}
+              <Section title="Status & Timeline">
+                <div className="grid gap-5 md:grid-cols-2">
+                  <Field label="Application / Contact Date" required>
+                    <Input
+                      type="date"
+                      name="dateAppliedOrContacted"
+                      defaultValue={entry?.dateAppliedOrContacted ?? today}
+                      required
+                      className="bg-background"
+                    />
+                  </Field>
+
+                  <Field label="Interview Date (if any)">
+                    <Input
+                      type="date"
+                      name="interviewDate"
+                      defaultValue={entry?.interviewDate ?? ''}
+                      className="bg-background"
+                    />
+                  </Field>
+                </div>
+
+                <div className="grid gap-5 md:grid-cols-2 mt-4">
+                  <Field label="Application Status">
+                    <Select
+                      name="applicationStatus"
+                      defaultValue={entry?.applicationStatus ?? 'Draft'}
+                    >
+                      <SelectTrigger className="bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {APPLICATION_STATUSES.map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {APPLICATION_STATUS_LABELS[s]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+
+                  <Field label="Response Status">
+                    <Select
+                      name="responseStatus"
+                      defaultValue={entry?.responseStatus ?? 'NoResponse'}
+                    >
+                      <SelectTrigger className="bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {RESPONSE_STATUSES.map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {RESPONSE_STATUS_LABELS[s]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                </div>
+
+                {entry && (
+                  <div className="grid gap-5 md:grid-cols-2 mt-4 pt-4 border-t border-dashed">
+                    <Field label="Last Follow-up Date">
+                      <Input
+                        type="date"
+                        name="lastFollowupDate"
+                        defaultValue={entry.lastFollowupDate ?? ''}
+                        className="bg-background"
+                      />
+                    </Field>
+
+                    <Field label="Follow-up Count">
+                      <Input
+                        type="number"
+                        name="followupCount"
+                        min={0}
+                        defaultValue={entry.followupCount ?? 0}
+                        className="bg-background"
+                        placeholder="e.g. 1"
+                      />
+                    </Field>
+                  </div>
+                )}
+              </Section>
+
+              {/* Notes */}
+              <Section title="Additional Notes">
+                <Textarea
+                  name="notes"
+                  rows={4}
+                  defaultValue={entry?.notes ?? ''}
+                  placeholder="Paste job description highlights, interview prep notes, or follow-up strategies here..."
+                  className="bg-background resize-none"
+                />
+              </Section>
+            </div>
           </div>
 
-          <footer className="border-t px-6 py-4 flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">
-              {loading && (
-                <Loader2 className="inline h-4 w-4 mr-2 animate-spin" />
+          <footer className="border-t bg-muted/20 px-6 py-5 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <span>Saving opportunity...</span>
+                </>
+              ) : (
+                <span className="flex items-center gap-1.5 text-xs bg-emerald-500/10 text-emerald-600 px-2 py-1 rounded-full font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Form Ready
+                </span>
               )}
-              {loading ? 'Saving…' : 'Ready'}
-            </span>
+            </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 onClick={() => onOpenChange(false)}
+                disabled={loading}
+                className="hover:bg-background"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading}>
-                {entry ? 'Save Changes' : 'Create'}
+              <Button type="submit" disabled={loading} className="min-w-[120px] font-semibold shadow-sm">
+                {entry ? 'Update Entry' : 'Create Opportunity'}
               </Button>
             </div>
           </footer>

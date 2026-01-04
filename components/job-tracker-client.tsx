@@ -24,6 +24,7 @@ import {
 } from 'lucide-react'
 import { StatsCard } from '@/components/dashboard-stats'
 import { cn } from '@/lib/utils'
+import { Header } from '@/components/header'
 
 export function JobTrackerClient({
   initialEntries,
@@ -40,19 +41,33 @@ export function JobTrackerClient({
   /* Stats (always from ALL data)  */
   /* ----------------------------- */
 
+  const activeEntries = initialEntries.filter((e) => e.isArchived === 'false')
+
   const stats = {
-    total: initialEntries.length,
-    pipeline: initialEntries.filter(
+    total: activeEntries.length,
+    pipeline: activeEntries.filter(
       (e) =>
+        e.applicationStatus === 'Draft' ||
         e.applicationStatus === 'Applied' ||
         e.applicationStatus === 'UnderReview',
     ).length,
-    interviews: initialEntries.filter(
+    interviews: activeEntries.filter(
       (e) => e.applicationStatus === 'InterviewScheduled',
     ).length,
-    followups: initialEntries.filter((e) => {
-      if (e.responseStatus !== 'NoResponse' || !e.nextFollowupDate) return false
-      return new Date(e.nextFollowupDate) <= new Date()
+    followups: activeEntries.filter((e) => {
+      if (e.responseStatus !== 'NoResponse') return false
+
+      // Keep outreach items in follow-up focus if they haven't responded
+      if (
+        e.opportunityType === 'ColdEmail' ||
+        e.opportunityType === 'LinkedInDM'
+      ) {
+        return true
+      }
+
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      return e.nextFollowupDate && new Date(e.nextFollowupDate) <= today
     }).length,
   }
 
@@ -84,6 +99,18 @@ export function JobTrackerClient({
   const handleFormSubmit = async (formData: FormData) => {
     const id = formData.get('id') as string | null
 
+    const lastFollowupDate = formData.get('lastFollowupDate') as string | null
+    const dateAppliedOrContacted = formData.get('dateAppliedOrContacted') as string
+    
+    // Calculate nextFollowupDate based on the most recent activity
+    let nextFollowupDate = null
+    const referenceDate = lastFollowupDate || dateAppliedOrContacted
+    if (referenceDate) {
+      const d = new Date(referenceDate)
+      d.setDate(d.getDate() + 3)
+      nextFollowupDate = d.toISOString().split('T')[0]
+    }
+
     const payload = {
       companyName: formData.get('companyName') as string,
       jobRole: formData.get('jobRole') as string,
@@ -93,9 +120,7 @@ export function JobTrackerClient({
       designation: (formData.get('designation') as string) || null,
       email: (formData.get('email') as string) || null,
       linkedinUrl: (formData.get('linkedinUrl') as string) || null,
-      dateAppliedOrContacted: formData.get(
-        'dateAppliedOrContacted',
-      ) as string,
+      dateAppliedOrContacted: dateAppliedOrContacted,
       applicationStatus: formData.get('applicationStatus') as string,
       responseStatus: formData.get('responseStatus') as string,
       interviewDate: (formData.get('interviewDate') as string) || null,
@@ -104,6 +129,9 @@ export function JobTrackerClient({
         (formData.get('emailTemplateVersion') as string) || null,
       jobLink: (formData.get('jobLink') as string) || null,
       notes: (formData.get('notes') as string) || null,
+      lastFollowupDate: lastFollowupDate || null,
+      followupCount: parseInt(formData.get('followupCount') as string) || 0,
+      nextFollowupDate,
     }
 
     if (id) {
@@ -121,29 +149,15 @@ export function JobTrackerClient({
   /* ----------------------------- */
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur">
-        <div className="mx-auto max-w-7xl h-14 px-4 sm:px-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
-              <Briefcase className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="text-sm font-semibold">Job Tracker</span>
-          </div>
+    <div className="min-h-screen bg-background flex flex-col">
+      <Header>
+        <Button size="sm" onClick={handleAdd} className="gap-1.5 h-8">
+          <Plus className="h-4 w-4" />
+          Add Entry
+        </Button>
+      </Header>
 
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <Button size="sm" onClick={handleAdd} className="gap-1.5">
-              <Plus className="h-4 w-4" />
-              Add Entry
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Content */}
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-8 space-y-10">
+      <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-8 space-y-10">
         {/* Page Title */}
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
@@ -206,6 +220,10 @@ export function JobTrackerClient({
               entries={entries}
               filter={filter}
               onEdit={handleEdit}
+              onDelete={async () => {
+                const refreshed = await getEntries(filter)
+                setEntries(refreshed)
+              }}
             />
           </div>
         </section>

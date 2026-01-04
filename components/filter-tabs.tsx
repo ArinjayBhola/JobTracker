@@ -26,7 +26,7 @@ const FILTERS: {
   { value: 'waiting', label: 'Pipeline', icon: Hourglass },
   { value: 'interviews', label: 'Interviews', icon: Calendar },
   { value: 'ghosted', label: 'Ghosted', icon: Ghost },
-  { value: 'closed', label: 'Archived', icon: Archive },
+  { value: 'archived', label: 'Archived', icon: Archive },
 ]
 
 export function FilterTabs({ activeFilter, onFilterChange }: FilterTabsProps) {
