@@ -1,43 +1,43 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { registerUser } from "@/actions/user"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { toast } from "sonner"
-import { Loader2, Briefcase } from "lucide-react"
-import Link from "next/link"
-import { signIn } from "next-auth/react"
-import { Header } from "@/components/header"
+import { useState } from "react";
+import { registerUser } from "@/actions/user";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { Loader2, Briefcase } from "lucide-react";
+import Link from "next/link";
+import { signIn } from "next-auth/react";
+import { Header } from "@/components/header";
 
 export default function SignupPage() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
-      await registerUser({ name, email, password })
-      toast.success("Account created successfully!")
-      await signIn("credentials", { email, password, callbackUrl: "/" })
+      await registerUser({ name, email, password });
+      toast.success("Account created successfully!");
+      await signIn("credentials", { email, password, callbackUrl: "/" });
     } catch (error: any) {
-      toast.error(error.message || "Failed to create account")
+      toast.error(error.message || "Failed to create account");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-[#fafafa] dark:bg-background">
       <Header />
       <div className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-[400px] shadow-xl border-none ring-1 ring-black/5 dark:ring-white/10">
+        <Card className="w-full max-w-100 shadow-xl border-none ring-1 ring-black/5 dark:ring-white/10">
           <CardHeader className="space-y-1 pb-6">
             <div className="flex justify-center mb-4">
               <div className="p-3 bg-primary/10 rounded-2xl">
@@ -45,14 +45,18 @@ export default function SignupPage() {
               </div>
             </div>
             <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
-            <CardDescription className="text-center">
-              Start tracking your applications with Precision
-            </CardDescription>
+            <CardDescription className="text-center">Start tracking your applications with Precision</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSignup} className="space-y-4">
+            <form
+              onSubmit={handleSignup}
+              className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-semibold">Full Name</Label>
+                <Label
+                  htmlFor="name"
+                  className="text-sm font-semibold">
+                  Full Name
+                </Label>
                 <Input
                   id="name"
                   placeholder="John Doe"
@@ -63,7 +67,11 @@ export default function SignupPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-semibold">Email Address</Label>
+                <Label
+                  htmlFor="email"
+                  className="text-sm font-semibold">
+                  Email Address
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -75,7 +83,11 @@ export default function SignupPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-semibold">Password</Label>
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-semibold">
+                  Password
+                </Label>
                 <Input
                   id="password"
                   type="password"
@@ -86,7 +98,10 @@ export default function SignupPage() {
                   required
                 />
               </div>
-              <Button type="submit" className="w-full h-11 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all active:scale-[0.98]" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full h-11 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all active:scale-[0.98]"
+                disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Create Account
               </Button>
@@ -101,12 +116,13 @@ export default function SignupPage() {
                 <span className="bg-[#fafafa] dark:bg-card px-2 text-muted-foreground">Or</span>
               </div>
             </div>
-            <Button 
-              variant="outline" 
-              className="w-full h-11 rounded-xl border-2 hover:bg-muted/50 transition-all font-medium" 
-              onClick={() => signIn("google", { callbackUrl: "/" })}
-            >
-              <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+            <Button
+              variant="outline"
+              className="w-full h-11 rounded-xl border-2 hover:bg-muted/50 transition-all font-medium"
+              onClick={() => signIn("google", { callbackUrl: "/" })}>
+              <svg
+                className="mr-2 h-4 w-4"
+                viewBox="0 0 24 24">
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                   fill="#4285F4"
@@ -128,7 +144,9 @@ export default function SignupPage() {
             </Button>
             <p className="text-center text-sm text-muted-foreground w-full pt-2">
               Already have an account?{" "}
-              <Link href="/login" className="text-primary font-semibold hover:underline decoration-2 underline-offset-4 transition-all">
+              <Link
+                href="/login"
+                className="text-primary font-semibold hover:underline decoration-2 underline-offset-4 transition-all">
                 Sign In
               </Link>
             </p>
@@ -136,5 +154,5 @@ export default function SignupPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

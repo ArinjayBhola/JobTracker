@@ -1,101 +1,109 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useTheme } from "next-themes"
-import { setUserPassword, getExportData, getUserSecurityStatus } from "@/actions/user"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import * as XLSX from "xlsx"
-import { toast } from "sonner"
-import { Loader2, Download, Lock, ShieldCheck, FileSpreadsheet, KeyRound, Palette, Sun, Moon, Monitor } from "lucide-react"
-import { Header } from "@/components/header"
-import { Separator } from "@/components/ui/separator"
+import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
+import { setUserPassword, getExportData, getUserSecurityStatus } from "@/actions/user";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import * as XLSX from "xlsx";
+import { toast } from "sonner";
+import {
+  Loader2,
+  Download,
+  Lock,
+  ShieldCheck,
+  FileSpreadsheet,
+  KeyRound,
+  Palette,
+  Sun,
+  Moon,
+  Monitor,
+} from "lucide-react";
+import { Header } from "@/components/header";
 
 export default function SettingsPage() {
-  const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [isExporting, setIsExporting] = useState(false)
-  const [securityStatus, setSecurityStatus] = useState<{ isGoogleUser: boolean, hasPassword: boolean } | null>(null)
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [securityStatus, setSecurityStatus] = useState<{ isGoogleUser: boolean; hasPassword: boolean } | null>(null);
 
   // Avoid hydration mismatch
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const fetchSecurityStatus = async () => {
       try {
-        const status = await getUserSecurityStatus()
-        setSecurityStatus(status)
+        const status = await getUserSecurityStatus();
+        setSecurityStatus(status);
       } catch (error) {
-        console.error("Failed to fetch security status:", error)
+        console.error("Failed to fetch security status:", error);
       }
-    }
-    fetchSecurityStatus()
-  }, [])
+    };
+    fetchSecurityStatus();
+  }, []);
 
   const handleSetPassword = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (password.length < 6) {
-      toast.error("Password must be at least 6 characters")
-      return
+      toast.error("Password must be at least 6 characters");
+      return;
     }
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match")
-      return
+      toast.error("Passwords do not match");
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      await setUserPassword(password)
-      toast.success("Password secured successfully")
-      setPassword("")
-      setConfirmPassword("")
+      await setUserPassword(password);
+      toast.success("Password secured successfully");
+      setPassword("");
+      setConfirmPassword("");
     } catch (error) {
-      toast.error("Failed to update security settings")
+      toast.error("Failed to update security settings");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleExport = async () => {
-    setIsExporting(true)
+    setIsExporting(true);
     try {
-      const data = await getExportData()
+      const data = await getExportData();
       if (!data || data.length === 0) {
-        toast.error("No application data found to export")
-        return
+        toast.error("No application data found to export");
+        return;
       }
 
-      const worksheet = XLSX.utils.json_to_sheet(data)
-      const workbook = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Job Applications")
-      XLSX.writeFile(workbook, "job_tracker_export.xlsx")
-      toast.success("Excel file generated and download started")
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Job Applications");
+      XLSX.writeFile(workbook, "job_tracker_export.xlsx");
+      toast.success("Excel file generated and download started");
     } catch (error) {
-      toast.error("An error occurred during export")
+      toast.error("An error occurred during export");
     } finally {
-      setIsExporting(false)
+      setIsExporting(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-[#fafafa] dark:bg-background flex flex-col">
       <Header />
-      
+
       <main className="flex-1 py-12 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto space-y-12">
           {/* Hero Section */}
           <div className="space-y-2">
             <h1 className="text-4xl font-bold tracking-tight text-foreground">Account Settings</h1>
-            <p className="text-muted-foreground text-lg">
-              Manage your preferences and export your tracking data.
-            </p>
+            <p className="text-muted-foreground text-lg">Manage your preferences and export your tracking data.</p>
           </div>
 
           <div className="grid gap-8 lg:grid-cols-12">
@@ -105,7 +113,8 @@ export default function SettingsPage() {
                 <ShieldCheck className="w-8 h-8 text-primary" />
                 <h3 className="font-semibold text-lg">Data Privacy</h3>
                 <p className="text-sm text-balance text-muted-foreground leading-relaxed">
-                  Your job hunting data is encrypted and only accessible by you. We never share your application details.
+                  Your job hunting data is encrypted and only accessible by you. We never share your application
+                  details.
                 </p>
               </div>
             </div>
@@ -127,7 +136,9 @@ export default function SettingsPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-8 space-y-6">
-                    <form onSubmit={handleSetPassword} className="space-y-6">
+                    <form
+                      onSubmit={handleSetPassword}
+                      className="space-y-6">
                       <div className="grid gap-6 sm:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="password">New Password</Label>
@@ -154,8 +165,15 @@ export default function SettingsPage() {
                           />
                         </div>
                       </div>
-                      <Button type="submit" disabled={isLoading} className="h-11 px-8 rounded-xl font-medium transition-all hover:shadow-lg hover:shadow-primary/20">
-                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
+                      <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="h-11 px-8 rounded-xl font-medium transition-all hover:shadow-lg hover:shadow-primary/20">
+                        {isLoading ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Lock className="mr-2 h-4 w-4" />
+                        )}
                         Update Password
                       </Button>
                     </form>
@@ -184,8 +202,7 @@ export default function SettingsPage() {
                         mounted && theme === "light"
                           ? "border-primary bg-primary/5"
                           : "border-muted hover:border-primary/50"
-                      }`}
-                    >
+                      }`}>
                       <Sun className="h-6 w-6" />
                       <span className="text-sm font-medium">Light</span>
                     </button>
@@ -195,8 +212,7 @@ export default function SettingsPage() {
                         mounted && theme === "dark"
                           ? "border-primary bg-primary/5"
                           : "border-muted hover:border-primary/50"
-                      }`}
-                    >
+                      }`}>
                       <Moon className="h-6 w-6" />
                       <span className="text-sm font-medium">Dark</span>
                     </button>
@@ -206,8 +222,7 @@ export default function SettingsPage() {
                         mounted && theme === "system"
                           ? "border-primary bg-primary/5"
                           : "border-muted hover:border-primary/50"
-                      }`}
-                    >
+                      }`}>
                       <Monitor className="h-6 w-6" />
                       <span className="text-sm font-medium">System</span>
                     </button>
@@ -235,8 +250,16 @@ export default function SettingsPage() {
                       <p className="font-medium">Export all entries</p>
                       <p className="text-sm text-muted-foreground">Detailed report in Excel format</p>
                     </div>
-                    <Button variant="outline" onClick={handleExport} disabled={isExporting} className="h-11 rounded-xl bg-background border-2 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all duration-300">
-                      {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                    <Button
+                      variant="outline"
+                      onClick={handleExport}
+                      disabled={isExporting}
+                      className="h-11 rounded-xl bg-background border-2 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all duration-300">
+                      {isExporting ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Download className="mr-2 h-4 w-4" />
+                      )}
                       Download .xlsx
                     </Button>
                   </div>
@@ -247,5 +270,5 @@ export default function SettingsPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

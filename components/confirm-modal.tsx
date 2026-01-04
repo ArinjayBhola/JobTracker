@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import {
   Dialog,
@@ -7,33 +7,35 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { AlertTriangle } from 'lucide-react'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle } from "lucide-react";
 
 interface ConfirmModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm: () => void
-  title?: string
-  description?: string
-  confirmText?: string
-  cancelText?: string
-  isPending?: boolean
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title?: string;
+  description?: string;
+  confirmText?: string;
+  cancelText?: string;
+  isPending?: boolean;
 }
 
 export function ConfirmModal({
   isOpen,
   onClose,
   onConfirm,
-  title = 'Are you sure?',
-  description = 'This action cannot be undone.',
-  confirmText = 'Delete',
-  cancelText = 'Cancel',
+  title = "Are you sure?",
+  description = "This action cannot be undone.",
+  confirmText = "Delete",
+  cancelText = "Cancel",
   isPending = false,
 }: ConfirmModalProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-md p-0 overflow-hidden border-none shadow-2xl">
         <div className="p-6">
           <div className="flex items-center gap-4">
@@ -41,12 +43,8 @@ export function ConfirmModal({
               <AlertTriangle className="h-6 w-6" />
             </div>
             <DialogHeader className="text-left">
-              <DialogTitle className="text-xl font-bold tracking-tight">
-                {title}
-              </DialogTitle>
-              <DialogDescription className="text-base text-muted-foreground/80 mt-1">
-                {description}
-              </DialogDescription>
+              <DialogTitle className="text-xl font-bold tracking-tight">{title}</DialogTitle>
+              <DialogDescription className="text-base text-muted-foreground/80 mt-1">{description}</DialogDescription>
             </DialogHeader>
           </div>
         </div>
@@ -55,20 +53,18 @@ export function ConfirmModal({
             variant="ghost"
             onClick={onClose}
             disabled={isPending}
-            className="flex-1 sm:flex-none hover:bg-muted font-medium"
-          >
+            className="flex-1 sm:flex-none hover:bg-muted font-medium">
             {cancelText}
           </Button>
           <Button
             variant="destructive"
             onClick={onConfirm}
             disabled={isPending}
-            className="flex-1 sm:flex-none bg-destructive hover:bg-destructive/90 shadow-sm font-medium"
-          >
-            {isPending ? 'Deleting...' : confirmText}
+            className="flex-1 sm:flex-none bg-destructive hover:bg-destructive/90 shadow-sm font-medium">
+            {isPending ? "Deleting..." : confirmText}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

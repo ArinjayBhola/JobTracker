@@ -1,24 +1,24 @@
-"use client"
+"use client";
 
-import { signIn } from "next-auth/react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import Link from "next/link"
-import { Header } from "@/components/header"
-import { Briefcase, Loader2 } from "lucide-react"
+import { signIn } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { Header } from "@/components/header";
+import { Briefcase, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [disable, setDisable] = useState(false)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [disable, setDisable] = useState(false);
 
   const handleCredentialsLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setDisable(true)
-    await signIn("credentials", { email, password, callbackUrl: "/" })
-  }
+    e.preventDefault();
+    setDisable(true);
+    await signIn("credentials", { email, password, callbackUrl: "/" });
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-[#fafafa] dark:bg-background">
@@ -32,18 +32,17 @@ export default function LoginPage() {
               </div>
             </div>
             <CardTitle className="text-2xl font-bold text-center">Welcome Back</CardTitle>
-            <CardDescription className="text-center">
-              Sign in to manage your job applications
-            </CardDescription>
+            <CardDescription className="text-center">Sign in to manage your job applications</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className={"w-full h-11 rounded-xl border-2 hover:bg-muted/50 transition-all font-medium"}
               onClick={() => signIn("google", { callbackUrl: "/" })}
-              disabled={disable}
-            >
-              <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+              disabled={disable}>
+              <svg
+                className="mr-2 h-4 w-4"
+                viewBox="0 0 24 24">
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                   fill="#4285F4"
@@ -71,27 +70,32 @@ export default function LoginPage() {
                 <span className="bg-[#fafafa] dark:bg-card px-2 text-muted-foreground">Or with email</span>
               </div>
             </div>
-            <form onSubmit={handleCredentialsLogin} className="space-y-4">
+            <form
+              onSubmit={handleCredentialsLogin}
+              className="space-y-4">
               <div className="space-y-2">
-                <Input 
-                  type="email" 
-                  placeholder="name@example.com" 
+                <Input
+                  type="email"
+                  placeholder="name@example.com"
                   className="h-11 rounded-xl bg-muted/30 border-none ring-1 ring-black/5 dark:ring-white/10 focus-visible:ring-primary"
-                  value={email} 
+                  value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
-                <Input 
-                  type="password" 
-                  placeholder="Password" 
+                <Input
+                  type="password"
+                  placeholder="Password"
                   className="h-11 rounded-xl bg-muted/30 border-none ring-1 ring-black/5 dark:ring-white/10 focus-visible:ring-primary"
-                  value={password} 
+                  value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
-              <Button type="submit" className="w-full h-11 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all active:scale-[0.98]" disabled={disable}>
-              {disable && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Button
+                type="submit"
+                className="w-full h-11 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all active:scale-[0.98]"
+                disabled={disable}>
+                {disable && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Sign In
               </Button>
             </form>
@@ -99,7 +103,9 @@ export default function LoginPage() {
           <CardFooter>
             <p className="text-center text-sm text-muted-foreground w-full">
               Don&apos;t have an account?{" "}
-              <Link href="/signup" className="text-primary font-semibold hover:underline decoration-2 underline-offset-4 transition-all">
+              <Link
+                href="/signup"
+                className="text-primary font-semibold hover:underline decoration-2 underline-offset-4 transition-all">
                 Create one
               </Link>
             </p>
@@ -107,5 +113,5 @@ export default function LoginPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

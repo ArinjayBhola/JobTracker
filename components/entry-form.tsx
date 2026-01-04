@@ -1,24 +1,13 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { JobEntry } from '@/db/schema'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { JobEntry } from "@/db/schema";
 import {
   OPPORTUNITY_TYPES,
   DESIGNATIONS,
@@ -28,120 +17,105 @@ import {
   DESIGNATION_LABELS,
   APPLICATION_STATUS_LABELS,
   RESPONSE_STATUS_LABELS,
-} from '@/types'
-import { Loader2 } from 'lucide-react'
+} from "@/types";
+import { Loader2 } from "lucide-react";
 
 interface EntryFormProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  entry?: JobEntry | null
-  onSubmit: (data: FormData) => Promise<void>
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  entry?: JobEntry | null;
+  onSubmit: (data: FormData) => Promise<void>;
 }
 
-function Section({
-  title,
-  description,
-  children,
-}: {
-  title: string
-  description?: string
-  children: React.ReactNode
-}) {
+function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
     <section className="space-y-4">
       <div>
         <h3 className="text-sm font-medium">{title}</h3>
-        {description && (
-          <p className="text-xs text-muted-foreground">
-            {description}
-          </p>
-        )}
+        {description && <p className="text-xs text-muted-foreground">{description}</p>}
       </div>
 
-      <div className="rounded-md border bg-muted/30 p-4 space-y-4">
-        {children}
-      </div>
+      <div className="rounded-md border bg-muted/30 p-4 space-y-4">{children}</div>
     </section>
-  )
+  );
 }
 
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string
-  required?: boolean
-  children: React.ReactNode
-}) {
+function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
       <Label className="text-xs text-muted-foreground">
         {label}
-        {required && (
-          <span className="ml-0.5 text-destructive">*</span>
-        )}
+        {required && <span className="ml-0.5 text-destructive">*</span>}
       </Label>
       {children}
     </div>
-  )
+  );
 }
 
-export function EntryForm({
-  open,
-  onOpenChange,
-  entry,
-  onSubmit,
-}: EntryFormProps) {
-  const [loading, setLoading] = useState(false)
-  const today = new Date().toISOString().split('T')[0]
+export function EntryForm({ open, onOpenChange, entry, onSubmit }: EntryFormProps) {
+  const [loading, setLoading] = useState(false);
+  const today = new Date().toISOString().split("T")[0];
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     try {
-      const formData = new FormData(e.currentTarget)
-      await onSubmit(formData)
-      onOpenChange(false)
+      const formData = new FormData(e.currentTarget);
+      await onSubmit(formData);
+      onOpenChange(false);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[720px] p-0 overflow-hidden border-none shadow-2xl h-full sm:h-auto max-h-screen sm:max-h-[90vh] flex flex-col">
         <DialogHeader className="bg-muted/30 px-4 sm:px-6 py-4 sm:py-6 border-b shrink-0">
           <DialogTitle className="text-xl font-bold tracking-tight">
-            {entry ? 'Edit Opportunity' : 'New Opportunity'}
+            {entry ? "Edit Opportunity" : "New Opportunity"}
           </DialogTitle>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             Track job applications, networking outreach, and interview stages.
           </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
-          {entry && <input type="hidden" name="id" value={entry.id} />}
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col flex-1 overflow-hidden">
+          {entry && (
+            <input
+              type="hidden"
+              name="id"
+              value={entry.id}
+            />
+          )}
 
           <div className="px-4 sm:px-6 py-6 overflow-y-auto flex-1">
             <div className="space-y-8">
               <Section title="Opportunity Details">
                 <div className="grid gap-5 md:grid-cols-2">
-                  <Field label="Company Name" required>
+                  <Field
+                    label="Company Name"
+                    required>
                     <Input
                       name="companyName"
-                      defaultValue={entry?.companyName ?? ''}
+                      defaultValue={entry?.companyName ?? ""}
                       placeholder="e.g. Google, Stripe, or Early-stage Startup"
                       required
                       className="bg-background"
                     />
                   </Field>
 
-                  <Field label="Job Role / Title" required>
+                  <Field
+                    label="Job Role / Title"
+                    required>
                     <Input
                       name="jobRole"
-                      defaultValue={entry?.jobRole ?? ''}
+                      defaultValue={entry?.jobRole ?? ""}
                       placeholder="e.g. Senior Frontend Engineer"
                       required
                       className="bg-background"
@@ -153,7 +127,7 @@ export function EntryForm({
                   <Field label="Work Location">
                     <Input
                       name="location"
-                      defaultValue={entry?.location ?? ''}
+                      defaultValue={entry?.location ?? ""}
                       placeholder="e.g. Remote, Bangalore, or Hybrid"
                       className="bg-background"
                     />
@@ -163,7 +137,7 @@ export function EntryForm({
                     <Input
                       name="jobLink"
                       type="url"
-                      defaultValue={entry?.jobLink ?? ''}
+                      defaultValue={entry?.jobLink ?? ""}
                       placeholder="e.g. https://linkedin.com/jobs/..."
                       className="bg-background"
                     />
@@ -174,7 +148,7 @@ export function EntryForm({
                   <Field label="Contact Person Name">
                     <Input
                       name="contactName"
-                      defaultValue={entry?.contactName ?? ''}
+                      defaultValue={entry?.contactName ?? ""}
                       placeholder="Name..."
                       className="bg-background"
                     />
@@ -183,14 +157,15 @@ export function EntryForm({
                   <Field label="Contact Designation">
                     <Select
                       name="designation"
-                      defaultValue={entry?.designation ?? ''}
-                    >
+                      defaultValue={entry?.designation ?? ""}>
                       <SelectTrigger className="bg-background">
                         <SelectValue placeholder="e.g. Recruiter, Founder" />
                       </SelectTrigger>
                       <SelectContent>
                         {DESIGNATIONS.map((d) => (
-                          <SelectItem key={d} value={d}>
+                          <SelectItem
+                            key={d}
+                            value={d}>
                             {DESIGNATION_LABELS[d]}
                           </SelectItem>
                         ))}
@@ -204,7 +179,7 @@ export function EntryForm({
                     <Input
                       name="email"
                       type="email"
-                      defaultValue={entry?.email ?? ''}
+                      defaultValue={entry?.email ?? ""}
                       placeholder="email@example.com"
                       className="bg-background"
                     />
@@ -214,7 +189,7 @@ export function EntryForm({
                     <Input
                       name="linkedinUrl"
                       type="url"
-                      defaultValue={entry?.linkedinUrl ?? ''}
+                      defaultValue={entry?.linkedinUrl ?? ""}
                       placeholder="e.g. https://linkedin.com/in/..."
                       className="bg-background"
                     />
@@ -224,17 +199,20 @@ export function EntryForm({
 
               <Section title="Classification">
                 <div className="grid gap-5 md:grid-cols-2">
-                  <Field label="Opportunity Type" required>
+                  <Field
+                    label="Opportunity Type"
+                    required>
                     <Select
                       name="opportunityType"
-                      defaultValue={entry?.opportunityType ?? 'JobApplication'}
-                    >
+                      defaultValue={entry?.opportunityType ?? "JobApplication"}>
                       <SelectTrigger className="bg-background">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {OPPORTUNITY_TYPES.map((t) => (
-                          <SelectItem key={t} value={t}>
+                          <SelectItem
+                            key={t}
+                            value={t}>
                             {OPPORTUNITY_TYPE_LABELS[t]}
                           </SelectItem>
                         ))}
@@ -246,7 +224,9 @@ export function EntryForm({
 
               <Section title="Status & Timeline">
                 <div className="grid gap-5 md:grid-cols-2">
-                  <Field label="Application / Contact Date" required>
+                  <Field
+                    label="Application / Contact Date"
+                    required>
                     <Input
                       type="date"
                       name="dateAppliedOrContacted"
@@ -260,7 +240,7 @@ export function EntryForm({
                     <Input
                       type="date"
                       name="interviewDate"
-                      defaultValue={entry?.interviewDate ?? ''}
+                      defaultValue={entry?.interviewDate ?? ""}
                       className="bg-background"
                     />
                   </Field>
@@ -270,14 +250,15 @@ export function EntryForm({
                   <Field label="Application Status">
                     <Select
                       name="applicationStatus"
-                      defaultValue={entry?.applicationStatus ?? 'Draft'}
-                    >
+                      defaultValue={entry?.applicationStatus ?? "Draft"}>
                       <SelectTrigger className="bg-background">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {APPLICATION_STATUSES.map((s) => (
-                          <SelectItem key={s} value={s}>
+                          <SelectItem
+                            key={s}
+                            value={s}>
                             {APPLICATION_STATUS_LABELS[s]}
                           </SelectItem>
                         ))}
@@ -288,14 +269,15 @@ export function EntryForm({
                   <Field label="Response Status">
                     <Select
                       name="responseStatus"
-                      defaultValue={entry?.responseStatus ?? 'NoResponse'}
-                    >
+                      defaultValue={entry?.responseStatus ?? "NoResponse"}>
                       <SelectTrigger className="bg-background">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {RESPONSE_STATUSES.map((s) => (
-                          <SelectItem key={s} value={s}>
+                          <SelectItem
+                            key={s}
+                            value={s}>
                             {RESPONSE_STATUS_LABELS[s]}
                           </SelectItem>
                         ))}
@@ -310,7 +292,7 @@ export function EntryForm({
                       <Input
                         type="date"
                         name="lastFollowupDate"
-                        defaultValue={entry.lastFollowupDate ?? ''}
+                        defaultValue={entry.lastFollowupDate ?? ""}
                         className="bg-background"
                       />
                     </Field>
@@ -333,7 +315,7 @@ export function EntryForm({
                 <Textarea
                   name="notes"
                   rows={4}
-                  defaultValue={entry?.notes ?? ''}
+                  defaultValue={entry?.notes ?? ""}
                   placeholder="Paste job description highlights, interview prep notes, or follow-up strategies here..."
                   className="bg-background resize-none"
                 />
@@ -362,17 +344,19 @@ export function EntryForm({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={loading}
-                className="flex-1 sm:flex-none hover:bg-background"
-              >
+                className="flex-1 sm:flex-none hover:bg-background">
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading} className="flex-[2] sm:flex-none sm:min-w-[120px] font-semibold shadow-sm">
-                {entry ? 'Update' : 'Create'}
+              <Button
+                type="submit"
+                disabled={loading}
+                className="flex-[2] sm:flex-none sm:min-w-[120px] font-semibold shadow-sm">
+                {entry ? "Update" : "Create"}
               </Button>
             </div>
           </footer>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
