@@ -26,9 +26,11 @@ import {
   Archive,
   Linkedin,
   Mail,
+  PlusCircle,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ConfirmModal } from "./confirm-modal";
+import { cn } from "@/lib/utils";
 
 interface TrackerTableProps {
   entries: JobEntry[];
@@ -36,6 +38,38 @@ interface TrackerTableProps {
   onEdit: (entry: JobEntry) => void;
   onDelete?: () => void;
 }
+
+const StatusBadge = ({ status, label }: { status: string; label: string }) => {
+  let colorClass = "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300";
+  let dotClass = "bg-zinc-400";
+
+  switch (status) {
+    case "Applied":
+      colorClass = "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border-blue-200 dark:border-blue-900/50";
+      dotClass = "bg-blue-500";
+      break;
+    case "InterviewScheduled":
+      colorClass = "bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300 border-orange-200 dark:border-orange-900/50";
+      dotClass = "bg-orange-500 animate-pulse";
+      break;
+    case "OfferReceived":
+      colorClass = "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/50";
+      dotClass = "bg-emerald-500";
+      break;
+    case "Rejected":
+      colorClass = "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300 border-red-200 dark:border-red-900/50";
+      dotClass = "bg-red-500";
+      break;
+    // Add other cases as needed
+  }
+
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border", colorClass)}>
+      <span className={cn("h-1.5 w-1.5 rounded-full", dotClass)} />
+      {label}
+    </span>
+  );
+};
 
 export function TrackerTable({ entries, filter, onEdit, onDelete }: TrackerTableProps) {
   const [isPending, startTransition] = useTransition();
@@ -62,9 +96,14 @@ export function TrackerTable({ entries, filter, onEdit, onDelete }: TrackerTable
 
   if (entries.length === 0) {
     return (
-      <div className="py-24 text-center text-muted-foreground">
-        <p className="text-sm font-medium">No opportunities found</p>
-        <p className="text-xs mt-1">Adjust filters or add a new entry.</p>
+      <div className="py-24 flex flex-col items-center justify-center text-center animate-fade-in">
+        <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
+          <PlusCircle className="h-8 w-8 text-muted-foreground/50" />
+        </div>
+        <h3 className="text-lg font-semibold">No opportunities found</h3>
+        <p className="text-sm text-muted-foreground mt-1 max-w-xs">
+          Your pipeline is empty right now. Start adding roles to track your progress.
+        </p>
       </div>
     );
   }
@@ -76,21 +115,17 @@ export function TrackerTable({ entries, filter, onEdit, onDelete }: TrackerTable
         {entries.map((entry) => (
           <div
             key={entry.id}
-            className="p-4 bg-card border rounded-xl shadow-sm space-y-4"
+            className="group relative p-4 bg-card border border-border/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
             onClick={() => onEdit(entry)}>
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start mb-3">
               <div className="space-y-1">
-                <h4 className="font-bold text-base leading-tight">{entry.companyName}</h4>
+                <h4 className="font-bold text-base leading-tight group-hover:text-primary transition-colors">{entry.companyName}</h4>
                 <p className="text-sm text-muted-foreground">{entry.jobRole}</p>
               </div>
-              <Badge
-                variant="secondary"
-                className="font-medium shrink-0">
-                {APPLICATION_STATUS_LABELS[entry.applicationStatus]}
-              </Badge>
+              <StatusBadge status={entry.applicationStatus} label={APPLICATION_STATUS_LABELS[entry.applicationStatus]} />
             </div>
 
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <div className="flex items-center gap-3 text-xs text-muted-foreground mb-4">
               {entry.location && (
                 <span className="flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
@@ -101,22 +136,21 @@ export function TrackerTable({ entries, filter, onEdit, onDelete }: TrackerTable
               {entry.opportunityType === "ColdEmail" && <Mail className="h-3 w-3 text-emerald-600" />}
             </div>
 
-            <div className="pt-3 border-t border-dashed flex items-center justify-between">
+            <div className="pt-3 border-t border-border/50 border-dashed flex items-center justify-between">
               <div className="flex flex-col gap-1">
                 {entry.applicationStatus === "InterviewScheduled" && entry.interviewDate ? (
-                  <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">
-                    Interview: {format(new Date(entry.interviewDate), "MMM d")}
+                  <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {format(new Date(entry.interviewDate), "MMM d")}
                   </span>
                 ) : (
                   entry.nextFollowupDate && (
-                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">
-                      Follow-up*: {format(new Date(entry.nextFollowupDate), "MMM d")}
+                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider flex items-center gap-1">
+                       <History className="h-3 w-3" />
+                      {format(new Date(entry.nextFollowupDate), "MMM d")}
                     </span>
                   )
                 )}
-                <span className="text-[10px] text-muted-foreground">
-                  Applied {format(new Date(entry.dateAppliedOrContacted), "MMM d")}
-                </span>
               </div>
 
               <div onClick={(e) => e.stopPropagation()}>
@@ -125,11 +159,11 @@ export function TrackerTable({ entries, filter, onEdit, onDelete }: TrackerTable
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8">
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground">
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" className="w-40">
                     <DropdownMenuItem onClick={() => onEdit(entry)}>
                       <Edit2 className="h-4 w-4 mr-2" />
                       Edit
@@ -143,7 +177,7 @@ export function TrackerTable({ entries, filter, onEdit, onDelete }: TrackerTable
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem
-                      className="text-destructive"
+                      className="text-destructive focus:text-destructive"
                       disabled={isPending}
                       onClick={() => handleDelete(entry.id)}>
                       <Trash2 className="h-4 w-4 mr-2" />
@@ -161,12 +195,12 @@ export function TrackerTable({ entries, filter, onEdit, onDelete }: TrackerTable
       <div className="hidden sm:block overflow-x-auto">
         <Table className="min-w-[800px]">
           <TableHeader>
-            <TableRow>
-              <TableHead className="pl-6">Company</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Timeline</TableHead>
-              <TableHead>Follow-ups</TableHead>
-              <TableHead className="w-[48px]" />
+            <TableRow className="hover:bg-transparent border-b border-border/50">
+              <TableHead className="pl-6 h-10 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">Company</TableHead>
+              <TableHead className="h-10 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">Status</TableHead>
+              <TableHead className="h-10 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">Timeline</TableHead>
+              <TableHead className="h-10 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">Metrics</TableHead>
+              <TableHead className="w-[48px] h-10" />
             </TableRow>
           </TableHeader>
 
@@ -174,18 +208,18 @@ export function TrackerTable({ entries, filter, onEdit, onDelete }: TrackerTable
             {entries.map((entry) => (
               <TableRow
                 key={entry.id}
-                className="cursor-pointer hover:bg-muted/40"
+                className="group cursor-pointer hover:bg-muted/30 border-b border-border/50 transition-colors"
                 onClick={() => onEdit(entry)}>
-                <TableCell className="pl-6">
+                <TableCell className="pl-6 py-4">
                   <div className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-semibold text-foreground">{entry.companyName}</span>
+                      <span className="font-semibold text-foreground group-hover:text-primary transition-colors">{entry.companyName}</span>
                       {entry.linkedinUrl && (
                         <a
                           href={entry.linkedinUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-muted-foreground hover:text-primary p-0.5"
+                          className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary p-0.5 transition-all"
                           onClick={(e) => e.stopPropagation()}>
                           <ExternalLink className="h-3 w-3" />
                         </a>
@@ -194,40 +228,26 @@ export function TrackerTable({ entries, filter, onEdit, onDelete }: TrackerTable
                     <div className="text-sm text-muted-foreground">
                       {entry.jobRole}
                       {entry.location && (
-                        <span className="ml-2 inline-flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
+                        <span className="ml-2 inline-flex items-center gap-1 text-xs">
+                          <MapPin className="h-3 w-3 opacity-70" />
                           {entry.location}
                         </span>
                       )}
                     </div>
-                    {(entry.contactName || entry.designation) && (
-                      <div className="text-[11px] text-muted-foreground/60 mt-0.5 font-medium">
-                        {entry.contactName && `Contact: ${entry.contactName}`}
-                        {entry.designation && (
-                          <span className="ml-1 opacity-80">
-                            ({DESIGNATION_LABELS[entry.designation as keyof typeof DESIGNATION_LABELS]})
-                          </span>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </TableCell>
 
-                <TableCell>
-                  <div className="flex flex-col gap-1">
-                    <Badge
-                      variant="secondary"
-                      className="w-fit font-medium text-[11px]">
-                      {APPLICATION_STATUS_LABELS[entry.applicationStatus]}
-                    </Badge>
-                    <div className="text-[11px] text-muted-foreground font-medium">
+                <TableCell className="py-4">
+                  <div className="flex flex-col gap-1.5 items-start">
+                    <StatusBadge status={entry.applicationStatus} label={APPLICATION_STATUS_LABELS[entry.applicationStatus]} />
+                    <span className="text-[10px] text-muted-foreground font-medium px-1">
                       {RESPONSE_STATUS_LABELS[entry.responseStatus]}
-                    </div>
+                    </span>
                   </div>
                 </TableCell>
 
-                <TableCell>
-                  <div className="flex flex-col gap-1">
+                <TableCell className="py-4">
+                  <div className="flex flex-col gap-1.5">
                     {entry.applicationStatus === "InterviewScheduled" && entry.interviewDate ? (
                       <div className="flex items-center gap-1.5 text-orange-600 dark:text-orange-400 font-semibold text-[10px] bg-orange-50 dark:bg-orange-950/30 px-2 py-0.5 rounded-full w-fit border border-orange-100 dark:border-orange-900/50 uppercase tracking-wider">
                         <Calendar className="h-3 w-3" />
@@ -236,9 +256,11 @@ export function TrackerTable({ entries, filter, onEdit, onDelete }: TrackerTable
                     ) : entry.nextFollowupDate ? (
                       <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-semibold text-[10px] bg-blue-50 dark:bg-blue-950/30 px-2 py-0.5 rounded-full w-fit border border-blue-100 dark:border-blue-900/50 uppercase tracking-wider">
                         <History className="h-3 w-3" />
-                        Next F/U*: {format(new Date(entry.nextFollowupDate), "MMM d")}
+                        Due: {format(new Date(entry.nextFollowupDate), "MMM d")}
                       </div>
-                    ) : null}
+                    ) : (
+                         <div className="h-5"></div> /* Spacer if no badge */
+                    )}
 
                     <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/50 px-1">
                       Applied: {format(new Date(entry.dateAppliedOrContacted), "MMM d")}
@@ -246,19 +268,21 @@ export function TrackerTable({ entries, filter, onEdit, onDelete }: TrackerTable
                   </div>
                 </TableCell>
 
-                <TableCell>
-                  <span className="text-xs font-medium">{entry.followupCount} Follow-Ups</span>
+                <TableCell className="py-4">
+                  <Badge variant="outline" className="font-normal text-[10px] h-5 hover:bg-transparent">
+                     {entry.followupCount} Follow-Ups
+                  </Badge>
                 </TableCell>
 
                 <TableCell
                   onClick={(e) => e.stopPropagation()}
-                  className="text-right pr-4">
+                  className="text-right pr-4 py-4">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8">
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -276,34 +300,8 @@ export function TrackerTable({ entries, filter, onEdit, onDelete }: TrackerTable
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
-                      {entry.isArchived === "true" ? (
-                        <DropdownMenuItem
-                          disabled={isPending}
-                          onClick={() => {
-                            startTransition(async () => {
-                              await archiveEntry(entry.id, false);
-                              onDelete?.();
-                            });
-                          }}>
-                          <History className="h-4 w-4 mr-2" />
-                          Restore from Archive
-                        </DropdownMenuItem>
-                      ) : (
-                        <DropdownMenuItem
-                          disabled={isPending}
-                          onClick={() => {
-                            startTransition(async () => {
-                              await archiveEntry(entry.id, true);
-                              onDelete?.();
-                            });
-                          }}>
-                          <Archive className="h-4 w-4 mr-2" />
-                          Archive
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        className="text-destructive"
+                        className="text-destructive focus:text-destructive"
                         disabled={isPending}
                         onClick={() => handleDelete(entry.id)}>
                         <Trash2 className="h-4 w-4 mr-2" />
@@ -324,22 +322,8 @@ export function TrackerTable({ entries, filter, onEdit, onDelete }: TrackerTable
         onConfirm={confirmDelete}
         isPending={isPending}
         title="Delete Job Entry"
-        description="Are you sure you want to delete this job entry? This action cannot be undone and all associated data will be lost."
+        description="Are you sure you want to delete this job entry? This action cannot be undone."
       />
-
-      <div className="mt-8 px-6 py-4 bg-muted/30 rounded-lg border border-dashed">
-        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Glossary</h4>
-        <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            <span className="font-semibold text-foreground">F/U*</span>
-            <span>Follow-up</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="font-semibold text-foreground">Int</span>
-            <span>Interview</span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

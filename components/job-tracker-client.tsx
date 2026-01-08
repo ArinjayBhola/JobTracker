@@ -8,10 +8,11 @@ import { TrackerTable } from "@/components/tracker-table";
 import { KanbanBoard } from "@/components/kanban-board";
 import { EntryForm } from "@/components/entry-form";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, Target, Send, Video, Bell, LayoutGrid, List as ListIcon, RefreshCcw } from "lucide-react";
+import { Plus, Loader2, Target, Send, Video, Bell, LayoutGrid, List as ListIcon, RefreshCcw, Briefcase } from "lucide-react";
 import { StatsCard } from "@/components/dashboard-stats";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/header";
+import { ShinyButton } from "@/components/ui/shiny-button";
 
 export function JobTrackerClient({ initialEntries }: { initialEntries: JobEntry[] }) {
   const [filter, setFilter] = useState<FilterType>("all");
@@ -130,16 +131,17 @@ export function JobTrackerClient({ initialEntries }: { initialEntries: JobEntry[
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header>
-        <Button
-          size="sm"
+        <ShinyButton
           onClick={handleAdd}
-          className="gap-1.5 h-8">
-          <Plus className="h-4 w-4" />
-          Add Entry
-        </Button>
+          className="h-9 px-4 text-xs font-semibold uppercase tracking-wider">
+          <span className="flex items-center gap-2">
+             <Plus className="h-4 w-4" />
+             New Opportunity
+          </span>
+        </ShinyButton>
       </Header>
 
-      <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-8 space-y-10">
+      <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-8 space-y-8 animate-fade-in">
         {/* Page Title */}
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Overview</h1>
@@ -178,13 +180,13 @@ export function JobTrackerClient({ initialEntries }: { initialEntries: JobEntry[
         <section className="space-y-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="w-full overflow-x-auto pb-1 sm:pb-0 custom-scrollbar">
+              <div className="w-full overflow-x-auto pb-1 sm:pb-0 custom-scrollbar mask-gradient-right">
                 <FilterTabs
                   activeFilter={filter}
                   onFilterChange={setFilter}
                 />
               </div>
-              <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-md border w-fit">
+              <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg border w-fit shrink-0">
                 <Button
                   variant={view === "table" ? "secondary" : "ghost"}
                   size="icon"
@@ -217,7 +219,7 @@ export function JobTrackerClient({ initialEntries }: { initialEntries: JobEntry[
           </div>
 
           <div
-            className={cn("rounded-lg border bg-card overflow-hidden transition-opacity", isPending && "opacity-60")}>
+            className={cn("rounded-xl border border-border/50 bg-card overflow-hidden transition-all duration-300 shadow-sm", isPending && "opacity-60")}>
             {view === "table" ? (
               <TrackerTable
                 entries={entries}
