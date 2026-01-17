@@ -8,16 +8,18 @@ import { TrackerTable } from "@/components/tracker-table";
 import { KanbanBoard } from "@/components/kanban-board";
 import { EntryForm } from "@/components/entry-form";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, Target, Send, Video, Bell, LayoutGrid, List as ListIcon, RefreshCcw, Briefcase } from "lucide-react";
+import { Plus, Loader2, Target, Send, Video, Bell, LayoutGrid, List as ListIcon, RefreshCcw, Briefcase, BarChart3 } from "lucide-react";
 import { StatsCard } from "@/components/dashboard-stats";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/header";
 import { ShinyButton } from "@/components/ui/shiny-button";
+import { AnalyticsDashboard } from "@/components/analytics-dashboard";
+import confetti from "canvas-confetti";
 
 export function JobTrackerClient({ initialEntries }: { initialEntries: JobEntry[] }) {
   const [filter, setFilter] = useState<FilterType>("all");
   const [entries, setEntries] = useState<JobEntry[]>(initialEntries);
-  const [view, setView] = useState<"table" | "kanban">("table");
+  const [view, setView] = useState<"table" | "kanban" | "analytics">("table");
   const [formOpen, setFormOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<JobEntry | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -113,6 +115,16 @@ export function JobTrackerClient({ initialEntries }: { initialEntries: JobEntry[
     startTransition(async () => {
       try {
         await updateEntry(id, { applicationStatus: newStatus } as any);
+        
+        if (newStatus === "Offer") {
+          confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#6366f1', '#8b5cf6', '#ec4899', '#10b981']
+          });
+        }
+
         const refreshed = await getEntries(filter);
         setEntries(refreshed);
       } catch (error) {
@@ -201,6 +213,13 @@ export function JobTrackerClient({ initialEntries }: { initialEntries: JobEntry[
                   onClick={() => setView("kanban")}>
                   <LayoutGrid className="h-4 w-4" />
                 </Button>
+                <Button
+                  variant={view === "analytics" ? "secondary" : "ghost"}
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setView("analytics")}>
+                  <BarChart3 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
 
@@ -230,7 +249,7 @@ export function JobTrackerClient({ initialEntries }: { initialEntries: JobEntry[
                   setEntries(refreshed);
                 }}
               />
-            ) : (
+            ) : view === "kanban" ? (
               <div className="p-4 overflow-hidden">
                 <KanbanBoard
                   entries={entries}
@@ -241,6 +260,10 @@ export function JobTrackerClient({ initialEntries }: { initialEntries: JobEntry[
                     setEntries(refreshed);
                   }}
                 />
+              </div>
+            ) : (
+              <div className="p-6">
+                <AnalyticsDashboard entries={entries} />
               </div>
             )}
           </div>
